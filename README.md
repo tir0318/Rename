@@ -1,4 +1,4 @@
-# new_name
+# NAME
 
 "new_name"は、Pythonによるファイル名の変更するプログラムです。
 
