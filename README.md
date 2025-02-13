@@ -1,6 +1,6 @@
 # NAME
 
-"new_name"は、Pythonによるファイル名の変更するプログラムです。
+"Rename"は、Pythonによるファイル名の変更するプログラムです。
 
 # DEMO
 
@@ -14,8 +14,8 @@
 
 "hoge"を動かすのに必要なライブラリなどを列挙する
 
-* Python 3.10.3
-* VSCode 1.67.2
+* Python 3.12.3
+* VSCode 1.97.1
 * Windows11
 
 # Installation
