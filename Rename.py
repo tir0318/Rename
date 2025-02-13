@@ -1,0 +1,80 @@
+import os
+from datetime import datetime
+from pathlib import Path
+from typing import List, Tuple
+
+class FileRenamer:
+    def __init__(self, directory_path: str = ""):
+        """ファイル名変更クラスの初期化
+        
+        Args:
+            directory_path (str): 処理対象のディレクトリパス
+        """
+        self.directory_path = Path(directory_path)
+        self.file_info: List[Tuple[str, str, Path]] = []  # (date_prefix, extension, file_path)
+
+    def collect_files(self) -> None:
+        """対象ディレクトリから【で始まらないファイルを収集"""
+        for file_path in self.directory_path.iterdir():
+            if file_path.is_file() and not file_path.name.startswith('【'):
+                date_prefix = self._get_date_prefix(file_path)
+                extension = file_path.suffix[1:]  # 先頭の'.'を除去
+                self.file_info.append((date_prefix, extension, file_path))
+        
+        self.file_info.sort()  # 日付でソート
+
+    def _get_date_prefix(self, file_path: Path) -> str:
+        """ファイルの作成日時から日付プレフィックスを生成
+        
+        Args:
+            file_path (Path): ファイルパス
+        
+        Returns:
+            str: 【YYYY_MM_DD】形式の日付文字列
+        """
+        created_time = datetime.fromtimestamp(file_path.stat().st_mtime)
+        return created_time.strftime('【%Y_%m_%d】')
+
+    def _get_sequence_number(self, date_prefix: str) -> str:
+        """同じ日付のファイル数に基づいて連番を生成
+        
+        Args:
+            date_prefix (str): 日付プレフィックス
+        
+        Returns:
+            str: 2桁の連番文字列
+        """
+        existing_files = [
+            f.name for f in self.directory_path.iterdir()
+            if f.is_file() and date_prefix in f.name
+        ]
+        sequence_number = len(existing_files) + 1
+        return f"{sequence_number:02d}"  # 2桁でゼロ埋め
+
+    def rename_files(self) -> None:
+        """ファイル名を変更"""
+        for date_prefix, extension, file_path in self.file_info:
+            sequence_number = self._get_sequence_number(date_prefix)
+            new_name = f"{date_prefix}{sequence_number}.{extension}"
+            new_path = self.directory_path / new_name
+            
+            try:
+                file_path.rename(new_path)
+                print(f"変更完了: {new_name}")
+            except Exception as e:
+                print(f"エラー - {file_path.name}: {e}")
+
+def main():
+    # ディレクトリパスを指定（空文字列の場合は現在のディレクトリ）
+    directory_path = ""
+    
+    try:
+        renamer = FileRenamer(directory_path)
+        renamer.collect_files()
+        renamer.rename_files()
+        print("処理が正常に終了しました")
+    except Exception as e:
+        print(f"エラーが発生しました: {e}")
+
+if __name__ == "__main__":
+    main()
